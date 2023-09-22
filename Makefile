@@ -97,6 +97,19 @@ $(I): $(O)
 mrproper:
 	$(Q)rm -rvf $(O) $(I) $(D)
 
+VERSION = 0
+SUBLEVEL = 1
+GIT_VERSION = $(shell git describe --always --long --dirty || echo "unknown")
+RELEASE_TAG:=$(VERSION).$(SUBLEVEL).$(GIT_VERSION)
+
+.PHONY:	source-tarball
+source-tarball:
+	cd u-boot
+	git archive --format=tar -o u-boot-$(RELEASE_TAG).tar.gz HEAD
+
+.PHONY: dist-srpm
+dist-srpm: source-tarball
+
 .PHONY: git
 git:
 	$(Q)git submodule status|grep '^-' && git submodule init && \
