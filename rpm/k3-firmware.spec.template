@@ -1,0 +1,47 @@
+Name:           k3-firmware
+Version:        0.1
+Release:        1%{?dist}
+Summary:        Boot firmware for Texas Instruments K3 devices
+
+License:        GPL-2.0+, MIT, NSD-2-Clause
+URL:            https://github.com/jto6/k3-upstream-boot-build
+Source0:        k3-upstream-boot-build-%%RELEASE_TAG%%.tar.gz
+Source1:        arm-trusted-firmware-%%RELEASE_TAG%%.tar.gz
+Source2:      	optee_os-%%RELEASE_TAG%%.tar.gz
+Source3:       	u-boot-%%RELEASE_TAG%%.tar.gz
+Source4:        ti-linux-firmware-%%RELEASE_TAG%%.tar.gz
+
+BuildRequires:  make, gcc, bc, bison, coreutils, dtc, flex, openssl
+#Requires:       
+
+%description
+Firmware requires to boot system software on TI K3 devices.  The firmware
+includes ATF, OP-TEE, system controller and security firmware, and U-Boot.
+
+%prep
+%setup    1 -n k3-upstream-boot-build/arm-trusted-firmware -c
+%setup -D 2 -n k3-upstream-boot-build/optee_os -c
+%setup -D 3 -n k3-upstream-boot-build/u-boot -c
+%setup -D 4 -n k3-upstream-boot-build/ti-linux-firmware -c
+%setup -D   -n k3-upstream-boot-build -c
+pwd
+
+%build
+pwd
+make %{soc}_evm_%{sectype}_all_defconfig
+%make_build
+
+%install
+rm -rf $%{rpm_build_root}
+%make_install
+
+
+%files
+%license LICENSE
+%doc add-docs-here
+
+
+
+%changelog
+* Wed Sep 20 2023 Jon Humphreys <j-humphreys@ti.com>
+- First k3-firmware package

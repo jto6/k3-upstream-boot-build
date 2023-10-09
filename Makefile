@@ -40,14 +40,6 @@ ifeq ($(SECURITY_TYPE),gp)
 	SECTYPE_EXT = _unsigned
 endif
 
-# Packaging variables
-PKGNAME = k3-firmware
-VERSION = 0
-SUBLEVEL = 1
-GIT_VERSION = $(shell git describe --always --long --dirty || echo "unknown")
-RELEASE_TAG:=$(VERSION).$(SUBLEVEL).$(GIT_VERSION)
-
-
 .PHONY: all
 ifndef SOC_NAME
 all: help
@@ -104,38 +96,6 @@ $(I): $(O)
 .PHONY: mrproper
 mrproper:
 	$(Q)rm -rvf $(O) $(I) $(D)
-
-.PHONY:	source-tarball
-source-tarball:
-	mkdir -p rpm/SOURCES/
-	git archive --prefix=k3-upstream-boot-build -o rpm/SOURCES/k3-upstream-boot-build-$(RELEASE_TAG).tar.gz HEAD
-	cd arm-trusted-firmware && \
-		git archive --prefix=arm-trusted-firmware -o ../rpm/SOURCES/arm-trusted-firmware-$(RELEASE_TAG).tar.gz HEAD
-	cd optee_os && \
-		git archive --prefix=optee_os -o ../rpm/SOURCES/optee_os-$(RELEASE_TAG).tar.gz HEAD
-	cd u-boot && \
-		git archive --prefix=u-boot -o ../rpm/SOURCES/u-boot-$(RELEASE_TAG).tar.gz HEAD
-	tar -czf rpm/SOURCES/ti-firmware-$(RELEASE_TAG).tar.gz ti-linux-firmware/ti-dm \
-		ti-linux-firmware/ti-sysfw
-
-.PHONY:	gen-spec
-gen-spec:
-	mkdir -p rpm/SRPMS/
-	sed "\
-		s/%%RELEASE_TAG%%/$(RELEASE_TAG)/; \
-		s/%%SPECTARFILE_RELEASE%%/$SPECTARFILE_RELEASE/" rpm/$(PKGNAME).spec.template > rpm/SRPMS/$(PKGNAME).spec
-
-.PHONY: dist-srpm
-dist-srpm: source-tarball gen-spec
-	rpmbuild -bs --define "_sourcedir $(PWD)/rpm/SOURCES" --define "_srcrpmdir $(PWD)rpm/SRPMS" rpm/SRPMS/$(PKGNAME).spec
-
-.PHONY: dist-rpm
-dist-rpm: source-tarball gen-spec
-	rpmbuild -bb --define "_sourcedir $(PWD)/rpm/SOURCES" --define "_srcrpmdir $(PWD)rpm/SRPMS" rpm/SRPMS/$(PKGNAME).spec
-
-.PHONY: dist-clean
-dist-clean:
-	rm -rf rpm/SOURCES rpm/SRPMS
 
 .PHONY: git
 git:
@@ -201,3 +161,6 @@ help:
 	$(Q)echo "Available defconfigs"
 	$(Q)cd $(CONFIG_DIR);ls *defconfig|sort|nl
 	$(Q)echo
+
+dist-%:
+	$(Q)$(MAKE) -C rpm $(@)	
