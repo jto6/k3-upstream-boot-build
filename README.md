@@ -21,11 +21,17 @@ The following lists the pre-requisites for building the bootloader components
 
 ## Compiler
 
-https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
-
 Download the following:
 * AArch32 GNU/Linux target with hard float (arm-none-linux-gnueabihf)
 * AArch64 GNU/Linux target (aarch64-none-linux-gnu)
+
+### Ubuntu
+Ubuntu provides ARM cross compiler packages.  Use them:
+
+apt install gcc-aarch64-linux-gnu gcc-arm-none-eabi
+
+### Directly from arm.com
+https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 
 Also see: https://www.linaro.org/downloads/#gnu_and_llvm You could
 optionally use https://snapshots.linaro.org/gnu-toolchain/, but
